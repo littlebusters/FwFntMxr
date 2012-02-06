@@ -1,0 +1,95 @@
+function LBfontMix(_mixTypes) {
+    
+    var d = fw.getDocumentDOM();
+    var isSelection = fw.selection.length;
+
+    if(isSelection == 2 
+        && fw.selection[0].__proto__ == Text.prototype 
+        && fw.selection[1].__proto__ == Text.prototype) {
+        var i;
+        var baseStrings = '';
+
+        var selectedObj  = fw.selection[1].textRuns;
+        var selectedRuns = selectedObj.textRuns;
+        
+        // extract baseStrings
+        for(i = 0; i < selectedRuns.length; i++) {
+            baseStrings += selectedRuns[i].characters;
+        }
+        //alert(baseStrings + ' / 文字数: ' + baseStrings.length);
+        
+        
+        var matchPattern = new String('[');
+        if(_mixTypes.hiragana) {matchPattern += '\\u3041-\\u3096';}
+        if(_mixTypes.katakana) {matchPattern += '\\u30A1-\\u30FA';}
+        if(_mixTypes.alphaU)   {matchPattern += '\\u0041-\\u005A\\uFF21-\\uFF3A';}
+        if(_mixTypes.alphaL)   {matchPattern += '\\u0061-\\u007A\\uFF41-\\uFF5A';}
+        if(_mixTypes.digit)    {matchPattern += '\\u0030-\\u0039\\uFF10-\\uFF19';}
+        if(_mixTypes.symbols)  {
+            matchPattern += '\\u0021-\\u002F\\u003A-\\u0040\\u005B-\\u0060\\u007B-\\u007E\\u00A1-\\u00A7\\u00AB\\u00B6\\u00BB\\u00BF';
+            matchPattern += '\\u2010\\u2013\\u2014\\u2018\\u2019\\u201C\\u201D\\u2020-\\u2022\\u2025\\u2026\\u2032\\u2033\\u203B-\\u203D\\u2042\\u2047-\\u2049\\u2051\\u25E6\\u2660-\\u266C';
+            matchPattern += '\\u3001-\\u3011\\u3014-\\u301F\\u3031\\u3032\\u3033\\u3034\\u3035\\u303B\\u303D\\u309D\\u309E\\u30A0\\u30FB-\\u30FE';
+            matchPattern += '\\uFF01-\\uFF0F\\uFF1A-\\uFF20\\uFF3B-\\uFF3F\\uFF5B-\\uFF65\\uFF70\\uFFE0-\\uFFE6';
+        }
+        if(_mixTypes.others)   {matchPattern += _mixTypes.otherChars}
+        matchPattern += ']';
+
+        var regExp = new RegExp(matchPattern);
+        //prompt('RegExp Pattern:', regExp);
+        
+        var runsString     = new Array();
+        var fontChangeFlag = new Array();
+        var sliceStart = 0;
+        var proccessing = true;
+
+        for(i = 0; i < baseStrings.length; i++) {
+           //alert('Char Check: ' + i + ' | charAt: ' + baseStrings.charAt(i));
+           if(regExp.test(baseStrings.charAt(i))) {
+           // 混植する文字の処理
+               if(!proccessing) {
+               // しない文字からする文字に変わった場合に、しない文字をスライス
+                   runsString.push(baseStrings.slice(sliceStart, i));
+                   fontChangeFlag.push(false);
+                   sliceStart = i;
+               }
+               proccessing = true;
+           } else if(proccessing) {
+           // 混植する文字からしない文字に変わった場合に、する文字をスライス
+               proccessing = false;
+               runsString.push(baseStrings.slice(sliceStart, i));
+               fontChangeFlag.push(true);
+               sliceStart = i;
+           }
+           if(i == baseStrings.length - 1) {
+           // 最後の文字の場合、sliceStartから最後の文字までスライス
+               runsString.push(baseStrings.slice(sliceStart));
+               fontChangeFlag.push(proccessing);
+           }
+        }
+
+        var setProperty = new Array();
+        var baseFont  = fw.selection[1].textRuns.initialAttrs.face;
+        var mixedFont = fw.selection[0].textRuns.initialAttrs.face;
+        for(i = 0; i < runsString.length; i++) {
+           if(fontChangeFlag[i]) {
+               setProperty.push([{changedAttrs: {face: mixedFont}, characters: runsString[i]}]);
+           } else {
+               setProperty.push([{changedAttrs: {face: baseFont}, characters: runsString[i]}]);
+           }
+           if(i) {setProperty[0] = setProperty[0].concat(setProperty[i]);}
+        }
+
+        selectedObj.textRuns = setProperty[0];
+        fw.selection[1].textRuns = selectedObj;
+        
+        // 混植元のテキストオブジェクトを削除
+        var delTgtObj = new Array();
+        delTgtObj[0] = fw.selection[0];
+        fw.getDocumentDOM().selectNone();
+        fw.selection = delTgtObj;
+        d.deleteSelection(false);
+
+    } else {
+       alert('テキストオブジェクトを2つ選択してください。');
+    }
+}
