@@ -12,13 +12,12 @@ function LBfontMix(_mixTypes) {
         var selectedObj  = fw.selection[1].textRuns;
         var selectedRuns = selectedObj.textRuns;
         
-        // extract baseStrings
+        // テキストオブジェクトから文字列を抽出
         for(i = 0; i < selectedRuns.length; i++) {
             baseStrings += selectedRuns[i].characters;
         }
-        //alert(baseStrings + ' / 文字数: ' + baseStrings.length);
         
-        
+		// 混植文字種の正規表現のパターンを生成
         var matchPattern = new String('[');
         if(_mixTypes.hiragana) {matchPattern += '\\u3041-\\u3096';}
         if(_mixTypes.katakana) {matchPattern += '\\u30A1-\\u30FA';}
@@ -33,15 +32,15 @@ function LBfontMix(_mixTypes) {
         }
         if(_mixTypes.others)   {matchPattern += _mixTypes.otherChars}
         matchPattern += ']';
-
         var regExp = new RegExp(matchPattern);
         //prompt('RegExp Pattern:', regExp);
         
+		// パターン（混植する/しない）にあわせて文字をスライス
         var runsString     = new Array();
         var fontChangeFlag = new Array();
         var sliceStart = 0;
         var proccessing = true;
-
+		
         for(i = 0; i < baseStrings.length; i++) {
            //alert('Char Check: ' + i + ' | charAt: ' + baseStrings.charAt(i));
            if(regExp.test(baseStrings.charAt(i))) {
@@ -66,7 +65,8 @@ function LBfontMix(_mixTypes) {
                fontChangeFlag.push(proccessing);
            }
         }
-
+		
+		// 混植処理（singleTextRun objectの生成→テキストオブジェクトに適用）
         var setProperty = new Array();
         var baseFont  = fw.selection[1].textRuns.initialAttrs.face;
         var mixedFont = fw.selection[0].textRuns.initialAttrs.face;
@@ -78,17 +78,16 @@ function LBfontMix(_mixTypes) {
            }
            if(i) {setProperty[0] = setProperty[0].concat(setProperty[i]);}
         }
-
         selectedObj.textRuns = setProperty[0];
         fw.selection[1].textRuns = selectedObj;
         
         // 混植元のテキストオブジェクトを削除
         var delTgtObj = new Array();
         delTgtObj[0] = fw.selection[0];
-        fw.getDocumentDOM().selectNone();
+        d.selectNone();
         fw.selection = delTgtObj;
         d.deleteSelection(false);
-
+		
     } else {
        alert('テキストオブジェクトを2つ選択してください。');
     }

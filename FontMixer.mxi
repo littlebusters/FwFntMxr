@@ -1,7 +1,8 @@
-﻿<macromedia-extension
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<macromedia-extension
 	 name="Font Mixer"
-	 version="1.0.0bata"
-	 type="Command Panel"
+	 version="1.0.1"
+	 type="commandpanel"
 	 mxiversion="2.0.0"
 	 xmanversion="2.0.0">
 
@@ -13,24 +14,26 @@
 
 	<description>
 	<![CDATA[
-	指定された文字種を別のフォントに置き換えます。
-	]]>
-	</description>
-
-	<ui-access>
-	<![CDATA[
-		ウィンドウ→fontMixerPanelで表示されます。
+		指定された文字種を別のフォントに置き換えます。
 		ベースとなるテキストオブジェクトをコピペし、コピペされたテキストオブジェクトのフォントを混植したいフォントに設定します。
 		オブジェクト深度の深いものがベースに、深度の浅いものが混植されるフォントになります。
 		テキストオブジェクトを2つ選択し、パネルの「mix!」ボタンを押してください。
 		パネルでチェックボックスが有効になっている文字種のフォントが置き換えられます。
 		使われるフォントは、テキストオブジェクトを選択した際に表示されるフォントです。既に混植している場合でも実行できますが、結果が思い通りにならないかもしれません。
 	]]>
+	</description>
+
+	<ui-access>
+	<![CDATA[
+		ウィンドウ→fontMixerPanelで表示されます。
+	]]>
 	</ui-access>
 
 	<license-agreement>
 	<![CDATA[
-	
+		フリーウェアとします。ご自身の責任で自由に使用していただいて構いません。
+		配布元が私ということが分かれば、再配布もしていただいて構いません。
+		&copy;creative tweet. http://creative-tweet.net
 	]]>
 	</license-agreement>
 
